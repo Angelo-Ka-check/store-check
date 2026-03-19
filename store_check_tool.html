@@ -226,7 +226,7 @@
         <div><div class="brand-mini-label">Spazio (1-5)</div><input type="number" id="f02spazio" oninput="calcMedia('f02')" placeholder="5" min="1" max="5" step="0.5"></div>
         <div><div class="brand-mini-label">Espo (1-5)</div><input type="number" id="f02esposizione" oninput="calcMedia('f02')" placeholder="5" min="1" max="5" step="0.5"></div>
       </div>
-      <div style="margin-top:6px;"><label>Media voto</label><input type="number" id="f02mediavoto" placeholder="auto" style="background:#fffde7;" placeholder="5.0" min="1" max="5" step="0.5"></div>
+      <div style="margin-top:6px;"><label>Media voto</label><input type="number" id="f02mediavoto" placeholder="auto" style="background:#fffde7;"  min="1" max="5" step="0.5"></div>
       <div style="margin-top:6px;"><label>Materiale POP</label><input type="text" id="f02pop" placeholder="es. Materiale aggiornato, Pannello ok..."></div>
     </div>
 
@@ -244,17 +244,9 @@
     </div>
 
     <!-- JAGUAR 03 -->
-    <div class="brand-block" style="border-left:4px solid #1B5E20;">
-      <div class="brand-label" style="background:#1B5E20;">JAGUAR (03)</div>
-      <div>
-        <label>Tipo di esposizione</label>
-        <select id="j03tipo">
-          <option value="">—</option>
-          <option>100 (ripiano grande)</option><option>50 (ripiano piccolo)</option>
-          <option>Orizzontale, 100 (ripiano grande)</option><option>Orizzontale, 50 (ripiano piccolo)</option>
-          <option>Verticale, 100 (ripiano grande)</option><option>Verticale, 50 (ripiano piccolo)</option>
-        </select>
-      </div>
+    <div class="brand-block">
+      <div class="brand-label">JAGUAR (03)</div>
+      
       <div class="brand-grid" style="margin-top:8px;">
         <div><div class="brand-mini-label">Ripiani</div><input type="number" id="j03ripiani" placeholder="1" min="0" max="20"></div>
         <div><div class="brand-mini-label">Pezzi</div><input type="number" id="j03pezzi" min="0"></div>
@@ -265,7 +257,7 @@
       <div style="margin-top:6px;"><label>POP / Note</label><input type="text" id="j03pop" placeholder="Descrizione materiale POP o note..."></div>
     </div>
 
-    <!-- CALYPSO (06) (06) -->
+    <!-- CALYPSO (06) -->
     <div class="brand-block">
       <div class="brand-label">CALYPSO / JAGUAR (06)</div>
       <div class="brand-grid">
@@ -454,66 +446,7 @@ async function parseWithAI() {
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner"></span>Estrazione in corso...';
 
-  const systemPrompt = `Sei un assistente che estrae dati strutturati da appunti di campo di uno store check su orologi.
-I brand del gruppo sono: FESTINA (codice 02), LOTUS (codice 01), CALYPSO (06) (codice 06).
-I competitor sono: CASIO, CITIZEN, SECTOR.
-Il sistema di valutazione va da 1 a 5.
-Il giudizio finale è: VERDE, GIALLO, ROSSO.
-L'entusiasmo del responsabile PV è: 1=molto poco entusiasta, 2=poco entusiasta, 3=entusiasta, 4=molto entusiasta.
-
-Estrai SOLO un oggetto JSON valido senza testo prima o dopo, con questi campi:
-{
-  "dtaVisita": "YYYY-MM-DD o vuoto",
-  "insegna": "nome insegna o vuoto",
-  "codicePv": "codice o vuoto",
-  "centroComm": "nome CC o vuoto",
-  "localita": "città",
-  "provincia": "sigla provincia 2 lettere uppercase",
-  "regione": "regione",
-  "brandTrattati": "lista brand separati da virgola",
-  "f02tipo": "tipo esposizione Festina o vuoto",
-  "f02ripiani": numero o null,
-  "f02pezzi": numero o null,
-  "f02spazio": numero 1-5 o null,
-  "f02esposizione": numero 1-5 o null,
-  "f02mediavoto": numero 1-5 o null,
-  "f02pop": "descrizione POP o vuoto",
-  "f01pezzi": numero o null,
-  "f01ripiani": numero o null,
-  "f01spazio": numero 1-5 o null,
-  "f01esposizione": numero 1-5 o null,
-  "f01mediavoto": numero 1-5 o null,
-  "f01pop": "vuoto",
-  "j03ripiani": numero o null,
-  "j03pezzi": numero o null,
-  "j03spazio": numero 1-5 o null,
-  "j03esposizione": numero 1-5 o null,
-  "j03mediavoto": numero 1-5 o null,
-  "j03pop": "vuoto",
-  "casioRip": numero o null,
-  "citizenRip": numero o null,
-  "sectorRip": numero o null,
-  "f06ripiani": numero o null,
-  "f06pezzi": numero o null,
-  "f06spazio": numero 1-5 o null,
-  "f06esposizione": numero 1-5 o null,
-  "f06mediavoto": numero 1-5 o null,
-  "f06pop": "vuoto",
-  "casioPz": numero o null,
-  "casioVoto": numero 1-5 o null,
-  "citizenPz": numero o null,
-  "citizenVoto": numero 1-5 o null,
-  "sectorPz": numero o null,
-  "sectorVoto": numero 1-5 o null,
-  "giudizio": "VERDE, GIALLO, ROSSO o vuoto",
-  "entusiasmo": numero 1-4 o null,
-  "top3_1": "primo brand reparto orologi o vuoto",
-  "top3_2": "secondo brand o vuoto",
-  "top3_3": "terzo brand o vuoto",
-  "interventoTipi": "lista tipi intervento separati da virgola, scegli tra: Nessuna modifica, Aggiornamento POP, Nuovo espositore, Riorganizzazione expo, Formazione personale, Altro",
-  "breve": "breve relazione sintetica in italiano",
-  "intervento": "note aggiuntive intervento o vuoto"
-}`;
+  var systemPrompt = 'Sei un assistente che estrae dati strutturati da appunti di campo di uno store check su orologi.\nI brand del gruppo sono: FESTINA (codice 02), LOTUS (codice 01), CALYPSO (06) (codice 06).\nI competitor sono: CASIO, CITIZEN, SECTOR.\nIl sistema di valutazione va da 1 a 5.\nIl giudizio finale è: VERDE, GIALLO, ROSSO.\nL\'entusiasmo del responsabile PV è: 1=molto poco entusiasta, 2=poco entusiasta, 3=entusiasta, 4=molto entusiasta.\n\nEstrai SOLO un oggetto JSON valido senza testo prima o dopo, con questi campi:\n{\n  "dtaVisita": "YYYY-MM-DD o vuoto",\n  "insegna": "nome insegna o vuoto",\n  "codicePv": "codice o vuoto",\n  "centroComm": "nome CC o vuoto",\n  "localita": "città",\n  "provincia": "sigla provincia 2 lettere uppercase",\n  "regione": "regione",\n  "brandTrattati": "lista brand separati da virgola",\n  "f02tipo": "tipo esposizione Festina o vuoto",\n  "f02ripiani": numero o null,\n  "f02pezzi": numero o null,\n  "f02spazio": numero 1-5 o null,\n  "f02esposizione": numero 1-5 o null,\n  "f02mediavoto": numero 1-5 o null,\n  "f02pop": "descrizione POP o vuoto",\n  "f01pezzi": numero o null,\n  "f01ripiani": numero o null,\n  "f01spazio": numero 1-5 o null,\n  "f01esposizione": numero 1-5 o null,\n  "f01mediavoto": numero 1-5 o null,\n  "f01pop": "vuoto",\n  "j03ripiani": numero o null,\n  "j03pezzi": numero o null,\n  "j03spazio": numero 1-5 o null,\n  "j03esposizione": numero 1-5 o null,\n  "j03mediavoto": numero 1-5 o null,\n  "j03pop": "vuoto",\n  "casioRip": numero o null,\n  "citizenRip": numero o null,\n  "sectorRip": numero o null,\n  "f06ripiani": numero o null,\n  "f06pezzi": numero o null,\n  "f06spazio": numero 1-5 o null,\n  "f06esposizione": numero 1-5 o null,\n  "f06mediavoto": numero 1-5 o null,\n  "f06pop": "vuoto",\n  "casioPz": numero o null,\n  "casioVoto": numero 1-5 o null,\n  "citizenPz": numero o null,\n  "citizenVoto": numero 1-5 o null,\n  "sectorPz": numero o null,\n  "sectorVoto": numero 1-5 o null,\n  "giudizio": "VERDE, GIALLO, ROSSO o vuoto",\n  "entusiasmo": numero 1-4 o null,\n  "top3_1": "primo brand reparto orologi o vuoto",\n  "top3_2": "secondo brand o vuoto",\n  "top3_3": "terzo brand o vuoto",\n  "interventoTipi": "lista tipi intervento separati da virgola, scegli tra: Nessuna modifica, Aggiornamento POP, Nuovo espositore, Riorganizzazione expo, Formazione personale, Altro",\n  "breve": "breve relazione sintetica in italiano",\n  "intervento": "note aggiuntive intervento o vuoto"\n}';
 
   try {
     const res = await fetch('https://api.anthropic.com/v1/messages', {
@@ -567,9 +500,8 @@ Estrai SOLO un oggetto JSON valido senza testo prima o dopo, con questi campi:
 
 function showExtractedNotice() {
   const out = document.getElementById('outputArea');
-  out.innerHTML = `<div style="background:#d4edda;border:1px solid #28a745;border-radius:8px;padding:14px;font-size:13px;color:#155724;">
-    ✅ <strong>Dati estratti dall’AI.</strong> Verifica i campi a sinistra, poi clicca <em>"Genera riga Excel + relazione"</em>.
-  </div>`;
+  out.innerHTML = '<div style="background:#d4edda;border:1px solid #28a745;border-radius:8px;padding:14px;font-size:13px;color:#155724;">\n    ✅ <strong>Dati estratti dall’AI.</strong> Verifica i campi a sinistra, poi clicca <em>"Genera riga Excel + relazione"</em>.\n  </div>';
+
 }
 
 async function generateRow() {
@@ -580,7 +512,8 @@ async function generateRow() {
   }
 
   const out = document.getElementById('outputArea');
-  out.innerHTML = `<div style="text-align:center;padding:30px;color:#666;"><span class="spinner" style="border-color:rgba(0,0,0,0.2);border-top-color:#333;"></span> Generazione in corso...</div>`;
+  out.innerHTML = '<div style="text-align:center;padding:30px;color:#666;"><span class="spinner" style="border-color:rgba(0,0,0,0.2);border-top-color:#333;"></span> Generazione in corso...</div>';
+
 
   // Build relazione if empty
   let relazione = data.breve;
@@ -653,15 +586,7 @@ function collectData() {
 }
 
 async function generateRelazione(data) {
-  const prompt = `Scrivi una breve relazione professionale di 1-2 frasi per questo store check:
-Insegna: ${data.insegna}, ${data.centroComm || ''}, ${data.localita}
-Festina: ${data.f02pezzi} pezzi, media voto ${data.f02mediavoto}, POP: ${data.f02pop}
-Competitor: Casio voto ${data.casioVoto}, Citizen voto ${data.citizenVoto}, Sector voto ${data.sectorVoto}
-Top 3 brand reparto: ${[data.top3_1, data.top3_2, data.top3_3].filter(Boolean).join(', ') || '—'}
-Entusiasmo responsabile: ${entusiasmoLabel(data.entusiasmo) || '—'}
-Giudizio: ${data.giudizio}
-Intervento: ${data.interventoCheckboxes || data.intervento}
-Rispondi SOLO con il testo della relazione, niente altro.`;
+  var prompt = 'Scrivi una breve relazione professionale di 1-2 frasi per questo store check:\nInsegna: ' + (data.insegna) + ', ' + (data.centroComm || '') + ', ' + (data.localita) + '\nFestina: ' + (data.f02pezzi) + ' pezzi, media voto ' + (data.f02mediavoto) + ', POP: ' + (data.f02pop) + '\nCompetitor: Casio voto ' + (data.casioVoto) + ', Citizen voto ' + (data.citizenVoto) + ', Sector voto ' + (data.sectorVoto) + '\nTop 3 brand reparto: ' + ([data.top3_1, data.top3_2, data.top3_3].filter(Boolean).join(', ') || '—') + '\nEntusiasmo responsabile: ' + (entusiasmoLabel(data.entusiasmo) || '—') + '\nGiudizio: ' + (data.giudizio) + '\nIntervento: ' + (data.interventoCheckboxes || data.intervento) + '\nRispondi SOLO con il testo della relazione, niente altro.';
 
   try {
     const res = await fetch('https://api.anthropic.com/v1/messages', {
@@ -679,11 +604,11 @@ Rispondi SOLO con il testo della relazione, niente altro.`;
 }
 
 function buildConcatena(d, relazione) {
-  const casioStr = d.casioVoto ? `Casio ${d.casioVoto}` : 'Casio';
-  const citizenStr = d.citizenVoto ? `Citizen ${d.citizenVoto}` : 'Citizen';
-  const sectorStr = d.sectorVoto ? `Sector ${d.sectorVoto}` : 'Sector';
-  const mediaStr = d.f02mediavoto ? `Media ${String(d.f02mediavoto).replace('.', ',')}` : 'Media';
-  return `${d.insegna} | ${d.giudizio} | ${mediaStr} | ${casioStr} / ${citizenStr} / ${sectorStr} | ${relazione}`;
+  var casioStr = d.casioVoto ? ('Casio ' + d.casioVoto) : 'Casio';
+  var citizenStr = d.citizenVoto ? ('Citizen ' + d.citizenVoto) : 'Citizen';
+  var sectorStr = d.sectorVoto ? ('Sector ' + d.sectorVoto) : 'Sector';
+  var mediaStr = d.f02mediavoto ? ('Media ' + String(d.f02mediavoto).replace('.', ',')) : 'Media';
+  return d.insegna + ' | ' + d.giudizio + ' | ' + mediaStr + ' | ' + casioStr + ' / ' + citizenStr + ' / ' + sectorStr + ' | ' + relazione;
 }
 
 function buildCodTxt(codice) {
@@ -755,49 +680,8 @@ function renderOutput(data, relazione, concatena, codTxt, giudizio2) {
   const tagClass = data.giudizio ? 'tag-' + data.giudizio.toLowerCase() : 'tag-gray';
   const tagLabel = data.giudizio || '—';
 
-  out.innerHTML = `
-    <div class="row-preview">
-      <h3>📍 Riepilogo visita</h3>
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
-        <strong style="font-size:15px;">${data.insegna || '—'}</strong>
-        <span class="tag ${tagClass}">${tagLabel}</span>
-        ${data.centroComm ? `<span style="color:#888;font-size:12px;">${data.centroComm}</span>` : ''}
-      </div>
-      <table class="kv-table">
-        <tr><td>Località</td><td>${data.localita} (${data.provincia}) — ${data.regione}</td></tr>
-        <tr><td>Codice PV</td><td>${codTxt || '—'}</td></tr>
-        <tr><td>Data</td><td>${data.dtaVisita || '—'}</td></tr>
-        <tr><td>Festina — pezzi</td><td>${data.f02pezzi || '—'} pz &nbsp;·&nbsp; media voto <strong>${data.f02mediavoto || '—'}</strong></td></tr>
-        <tr><td>Festina — ripiani</td><td>${data.f02ripiani || '—'} &nbsp;·&nbsp; ${data.f02tipo || '—'}</td></tr>
-        <tr><td>POP Festina</td><td>${data.f02pop || '—'}</td></tr>
-        ${data.f01pezzi ? `<tr><td>Lotus — pezzi</td><td>${data.f01pezzi} pz · media ${data.f01mediavoto || '—'}</td></tr>` : ''}
-        ${data.f06pezzi ? `<tr><td>CALYPSO (06)</td><td>${data.f06pezzi} pz · media ${data.f06mediavoto || '—'}</td></tr>` : ''}
-        <tr><td>Casio</td><td>${data.casioPz ? data.casioPz + ' pz ·' : ''} voto ${data.casioVoto || '—'}</td></tr>
-        <tr><td>Citizen</td><td>${data.citizenPz ? data.citizenPz + ' pz ·' : ''} voto ${data.citizenVoto || '—'}</td></tr>
-        <tr><td>Sector</td><td>${data.sectorPz ? data.sectorPz + ' pz ·' : ''} voto ${data.sectorVoto || '—'}</td></tr>
-        ${data.intervento || data.interventoCheckboxes ? `<tr><td>Intervento</td><td style="color:#c0392b;font-weight:600;">${interventoFull || '—'}</td></tr>` : ''}
-        ${data.entusiasmo ? `<tr><td>Entusiasmo resp.</td><td>${entusiasmoLabel(data.entusiasmo)}</td></tr>` : ''}
-        ${data.top3_1 ? `<tr><td>Top 3 brand</td><td>${[data.top3_1, data.top3_2, data.top3_3].filter(Boolean).join(' › ')}</td></tr>` : ''}
-      </table>
-    </div>
+  out.innerHTML = '    <div class="row-preview">\n      <h3>📍 Riepilogo visita</h3>\n      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">\n        <strong style="font-size:15px;">' + (data.insegna || '—') + '</strong>\n        <span class="tag ' + (tagClass) + '">' + (tagLabel) + '</span>\n        ' + (data.centroComm ? '<span style="color:#888;font-size:12px;">' + (data.centroComm) + '</span>' : '') + '\n      </div>\n      <table class="kv-table">\n        <tr><td>Località</td><td>' + (data.localita) + ' (' + (data.provincia) + ') — ' + (data.regione) + '</td></tr>\n        <tr><td>Codice PV</td><td>' + (codTxt || '—') + '</td></tr>\n        <tr><td>Data</td><td>' + (data.dtaVisita || '—') + '</td></tr>\n        <tr><td>Festina — pezzi</td><td>' + (data.f02pezzi || '—') + ' pz &nbsp;·&nbsp; media voto <strong>' + (data.f02mediavoto || '—') + '</strong></td></tr>\n        <tr><td>Festina — ripiani</td><td>' + (data.f02ripiani || '—') + ' &nbsp;·&nbsp; ' + (data.f02tipo || '—') + '</td></tr>\n        <tr><td>POP Festina</td><td>' + (data.f02pop || '—') + '</td></tr>\n        ' + (data.f01pezzi ? '<tr><td>Lotus — pezzi</td><td>' + (data.f01pezzi) + ' pz · media ' + (data.f01mediavoto || '—') + '</td></tr>' : '') + '\n        ' + (data.f06pezzi ? '<tr><td>CALYPSO (06)</td><td>' + (data.f06pezzi) + ' pz · media ' + (data.f06mediavoto || '—') + '</td></tr>' : '') + '\n        <tr><td>Casio</td><td>' + (data.casioPz ? data.casioPz + ' pz ·' : '') + ' voto ' + (data.casioVoto || '—') + '</td></tr>\n        <tr><td>Citizen</td><td>' + (data.citizenPz ? data.citizenPz + ' pz ·' : '') + ' voto ' + (data.citizenVoto || '—') + '</td></tr>\n        <tr><td>Sector</td><td>' + (data.sectorPz ? data.sectorPz + ' pz ·' : '') + ' voto ' + (data.sectorVoto || '—') + '</td></tr>\n        ' + (data.intervento || data.interventoCheckboxes ? '<tr><td>Intervento</td><td style="color:#c0392b;font-weight:600;">' + (interventoFull || '—') + '</td></tr>' : '') + '\n        ' + (data.entusiasmo ? '<tr><td>Entusiasmo resp.</td><td>' + (entusiasmoLabel(data.entusiasmo)) + '</td></tr>' : '') + '\n        ' + (data.top3_1 ? '<tr><td>Top 3 brand</td><td>' + ([data.top3_1, data.top3_2, data.top3_3].filter(Boolean).join(' › ')) + '</td></tr>' : '') + '\n      </table>\n    </div>\n\n    <div class="relazione-box">\n      <h3>📝 Relazione</h3>\n      <div class="relazione-text">' + (relazione || 'Nessuna relazione generata.') + '</div>\n    </div>\n\n    <div class="relazione-box">\n      <h3>🔗 Colonna CONCATENA (formula automatica)</h3>\n      <div class="relazione-text" style="font-size:12px;color:#555;">' + (concatena) + '</div>\n    </div>\n\n    <div class="excel-row">\n      <h3>📊 Riga pronta per Excel — copia e incolla</h3>\n      <p style="font-size:11px;color:#888;margin-bottom:8px;">Seleziona la prima cella vuota nella riga corrispondente del foglio <strong>store check</strong> e premi Ctrl+V (o Cmd+V)</p>\n      <div class="copy-block" id="tsvBlock">' + (tsv.replace(/\t/g, ' | ')) + '</div>\n      <button class="copy-btn" onclick="copyTSV(\'' + (encodeURIComponent(tsv)) + '\')">📋 Copia riga (formato Excel TSV)</button>\n    </div>';
 
-    <div class="relazione-box">
-      <h3>📝 Relazione</h3>
-      <div class="relazione-text">${relazione || 'Nessuna relazione generata.'}</div>
-    </div>
-
-    <div class="relazione-box">
-      <h3>🔗 Colonna CONCATENA (formula automatica)</h3>
-      <div class="relazione-text" style="font-size:12px;color:#555;">${concatena}</div>
-    </div>
-
-    <div class="excel-row">
-      <h3>📊 Riga pronta per Excel — copia e incolla</h3>
-      <p style="font-size:11px;color:#888;margin-bottom:8px;">Seleziona la prima cella vuota nella riga corrispondente del foglio <strong>store check</strong> e premi Ctrl+V (o Cmd+V)</p>
-      <div class="copy-block" id="tsvBlock">${tsv.replace(/\t/g, ' | ')}</div>
-      <button class="copy-btn" onclick="copyTSV('${encodeURIComponent(tsv)}')">📋 Copia riga (formato Excel TSV)</button>
-    </div>
-  `;
 }
 
 function copyTSV(encoded) {
@@ -821,7 +705,7 @@ function clearAll() {
   document.querySelectorAll('.entusiasmo-btn').forEach(b => b.classList.remove('active'));
   document.querySelectorAll('.intervento-check').forEach(l => l.classList.remove('checked'));
   document.querySelectorAll('.intervento-check input[type=checkbox]').forEach(c => { c.checked = false; });
-  document.getElementById('outputArea').innerHTML = `<div class="empty-state"><div class="icon">📋</div><p>Campi svuotati. Inserisci nuovi appunti.</p></div>`;
+  document.getElementById('outputArea').innerHTML = '<div class="empty-state"><div class="icon">📋</div><p>Campi svuotati. Inserisci nuovi appunti.</p></div>';
 }
 
 
@@ -887,22 +771,16 @@ function showLookupBadge(type, ragione, insegna, localita, regione, isTarget, ch
   const el = document.getElementById('lookupBadge');
   if (!el) return;
   if (type === 'not-found') {
-    el.innerHTML = `<div style="background:#f8d7da;border:1px solid #f5c6cb;border-radius:6px;padding:10px 12px;font-size:12px;color:#721c24;">
-      ⚠️ Codice non trovato nell’anagrafica — compila manualmente.
-    </div>`;
+    el.innerHTML = '<div style="background:#f8d7da;border:1px solid #f5c6cb;border-radius:6px;padding:10px 12px;font-size:12px;color:#721c24;">\n      ⚠️ Codice non trovato nell’anagrafica — compila manualmente.\n    </div>';
     return;
   }
-  const targetHTML = isTarget
-    ? `<span style="background:#d4edda;color:#155724;font-size:11px;font-weight:700;padding:2px 7px;border-radius:10px;margin-left:6px;">✓ Campagna 2026</span>`
-    : `<span style="background:#f1f1f1;color:#888;font-size:11px;padding:2px 7px;border-radius:10px;margin-left:6px;">Fuori campagna 2026</span>`;
-  const checkHTML = check && check !== '0' ? `<span style="color:#666;font-size:11px;"> · ${check}</span>` : '';
-  const noteHTML = note ? `<div style="margin-top:5px;font-size:11px;color:#666;font-style:italic;">${note}</div>` : '';
-  el.innerHTML = `<div style="background:#e8f4fd;border:1px solid #bee3f8;border-radius:6px;padding:10px 12px;font-size:12px;color:#0c4a6e;">
-    <div style="font-weight:700;font-size:13px;margin-bottom:3px;">✓ ${ragione || insegna} ${targetHTML}</div>
-    <div>${insegna || ''} · ${localita || ''} · ${regione || ''}${checkHTML}</div>
-    ${noteHTML}
-    <div style="margin-top:6px;font-size:11px;color:#1a6eb5;cursor:pointer;" onclick="hideLookupBadge()">Campi compilati — clicca per nascondere</div>
-  </div>`;
+  var targetHTML = isTarget
+    ? '<span style="background:#d4edda;color:#155724;font-size:11px;font-weight:700;padding:2px 7px;border-radius:10px;margin-left:6px;">✓ Campagna 2026</span>'
+    : '<span style="background:#f1f1f1;color:#888;font-size:11px;padding:2px 7px;border-radius:10px;margin-left:6px;">Fuori campagna 2026</span>';
+  var checkHTML = check && check !== '0' ? '<span style="color:#666;font-size:11px;"> · ' + (check) + '</span>' : '';
+  var noteHTML = note ? '<div style="margin-top:5px;font-size:11px;color:#666;font-style:italic;">' + (note) + '</div>' : '';
+  el.innerHTML = '<div style="background:#e8f4fd;border:1px solid #bee3f8;border-radius:6px;padding:10px 12px;font-size:12px;color:#0c4a6e;">\n    <div style="font-weight:700;font-size:13px;margin-bottom:3px;">✓ ' + (ragione || insegna) + ' ' + (targetHTML) + '</div>\n    <div>' + (insegna || '') + ' · ' + (localita || '') + ' · ' + (regione || '') + (checkHTML) + '</div>\n    ' + (noteHTML) + '\n    <div style="margin-top:6px;font-size:11px;color:#1a6eb5;cursor:pointer;" onclick="hideLookupBadge()">Campi compilati — clicca per nascondere</div>\n  </div>';
+
 }
 
 
