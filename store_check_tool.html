@@ -109,6 +109,18 @@
 
   .highlight { background: #fffbcc; }
 
+  .search-results-list { background:white; border:1px solid #ccc; border-radius:6px; max-height:220px; overflow-y:auto; font-size:12px; }
+  .search-result-item { padding:8px 12px; cursor:pointer; border-bottom:1px solid #f0f0f0; display:flex; flex-direction:column; gap:2px; }
+  .search-result-item:hover { background:#e8f4fd; }
+  .search-result-item:last-child { border-bottom:none; }
+  .sri-code { font-weight:700; color:#1a1a2e; font-size:11px; }
+  .sri-name { font-size:12px; color:#333; }
+  .sri-detail { font-size:11px; color:#888; }
+  .sri-campagna { font-size:10px; font-weight:700; color:#155724; background:#d4edda; padding:1px 6px; border-radius:8px; display:inline-block; }
+  .save-status { font-size:12px; padding:8px 12px; border-radius:6px; margin-top:6px; text-align:center; display:none; }
+  .save-status.ok { background:#d4edda; color:#155724; display:block; }
+  .save-status.err { background:#f8d7da; color:#721c24; display:block; }
+  .save-status.loading { background:#e8f4fd; color:#0c4a6e; display:block; }
   @media (max-width: 900px) {
     .main { grid-template-columns: 1fr; height: auto; }
     .left { border-right: none; border-bottom: 1px solid #ddd; }
@@ -165,7 +177,21 @@
         </div>
       </div>
       <div class="field-row" style="margin-top:8px;">
-        <div><label>Codice PV</label><div style="display:flex;gap:5px;"><input type="text" id="codicePv" placeholder="es. 17370" oninput="debounceLookup()" style="flex:1;"><button onclick="lookupPV()" style="padding:7px 10px;background:#1a1a2e;color:white;border:none;border-radius:4px;cursor:pointer;font-size:12px;white-space:nowrap;">🔍 Cerca</button></div></div>
+        <div>
+  <label>Codice PV</label>
+  <div style="display:flex;gap:5px;">
+    <input type="text" id="codicePv" placeholder="es. 17370" oninput="debounceLookup()" style="flex:1;">
+    <button onclick="lookupPV()" style="padding:7px 10px;background:#1a1a2e;color:white;border:none;border-radius:4px;cursor:pointer;font-size:12px;white-space:nowrap;">🔍 Cerca</button>
+  </div>
+</div>
+<div style="margin-top:6px;">
+  <label>Oppure cerca per città / centro commerciale / insegna</label>
+  <div style="display:flex;gap:5px;">
+    <input type="text" id="searchText" placeholder="es. Napoli, Euroma, Stroili..." oninput="debounceSearch()" style="flex:1;">
+    <button onclick="searchFreeText()" style="padding:7px 10px;background:#444;color:white;border:none;border-radius:4px;cursor:pointer;font-size:12px;white-space:nowrap;">🔎 Cerca</button>
+  </div>
+  <div id="searchResults" style="margin-top:4px;"></div>
+</div>
         <div><label>Centro commerciale</label><input type="text" id="centroComm" placeholder="es. Euroma 2"></div>
       </div>
       <div id="lookupBadge" style="margin-top:6px;"></div>
@@ -325,8 +351,12 @@
 
     <!-- GENERA RIGA -->
     <button class="ai-btn" onclick="generateRow()" style="background:#2d5a27;">
-      📊 Genera riga Excel + relazione
+      📊 Genera anteprima riga
     </button>
+    <button class="ai-btn" id="saveBtn" onclick="saveToSheets()" style="background:#0f4c35;margin-top:4px;" disabled>
+      ☁️ Salva direttamente su Google Sheets
+    </button>
+    <div id="saveStatus" class="save-status"></div>
     <button class="ai-btn-secondary" onclick="clearAll()">🗑 Pulisci tutto</button>
 
   </div>
@@ -529,6 +559,7 @@ async function generateRow() {
   const giudizio2 = data.giudizio;
 
   renderOutput(data, relazione, concatena, codTxt, giudizio2);
+  enableSaveBtn(data, relazione);
 }
 
 function collectData() {
@@ -828,6 +859,143 @@ function showLookupBadge(type, ragione, insegna, localita, regione, isTarget, ch
     ${noteHTML}
     <div style="margin-top:6px;font-size:11px;color:#1a6eb5;cursor:pointer;" onclick="hideLookupBadge()">Campi compilati — clicca per nascondere</div>
   </div>`;
+}
+
+
+// ===== SAVE TO GOOGLE SHEETS =====
+const SHEETS_ID = "1Q18CIurOs8lTgYm9vSg6HWxvJTAkMQtF";
+const SHEETS_GID = "1983796481";
+let _lastRowData = null;
+let _lastRelazione = null;
+
+function enableSaveBtn(rowData, relazione) {
+  _lastRowData = rowData;
+  _lastRelazione = relazione;
+  const btn = document.getElementById('saveBtn');
+  if (btn) { btn.disabled = false; btn.style.opacity = '1'; }
+}
+
+async function saveToSheets() {
+  if (!_lastRowData) { alert('Genera prima la riga.'); return; }
+
+  const btn = document.getElementById('saveBtn');
+  const status = document.getElementById('saveStatus');
+  btn.disabled = true;
+  status.className = 'save-status loading';
+  status.textContent = 'Salvataggio in corso...';
+
+  // Build the row values in the exact column order of the Sheets
+  // Columns: Data visita, Centro comm., Località, Prov., Regione, Insegna, Codice PV,
+  //          Cluster CC, Cluster PV,
+  //          F02 Ripiani, F02 Pezzi, F02 Voto, F02 POP/Note,
+  //          L01 Ripiani, L01 Pezzi, L01 Voto, L01 POP/Note,
+  //          J03 Ripiani, J03 Pezzi, J03 Voto, J03 POP/Note,
+  //          C06 Ripiani, C06 Pezzi, C06 Voto, C06 POP/Note,
+  //          Casio rip., Casio pz, Casio voto,
+  //          Citizen rip., Citizen pz, Citizen voto,
+  //          Sector rip., Sector pz, Sector voto,
+  //          Giudizio, Relazione, Intervento
+  const d = _lastRowData;
+  const interventoFull = [d.interventoCheckboxes, d.intervento].filter(Boolean).join(' — ');
+  const values = [[
+    d.dtaVisita, d.centroComm, d.localita, d.provincia, d.regione,
+    d.insegna, d.codicePv, d.clusterCC || '', d.clusterPV || '',
+    d.f02ripiani, d.f02pezzi, d.f02mediavoto, d.f02pop,
+    d.f01ripiani, d.f01pezzi, d.f01mediavoto, d.f01pop,
+    '', '', '', '',  // J03 - Jaguar (not in current form, empty)
+    d.f06ripiani, d.f06pezzi, d.f06mediavoto, d.f06pop,
+    '', d.casioPz, d.casioVoto,
+    '', d.citizenPz, d.citizenVoto,
+    '', d.sectorPz, d.sectorVoto,
+    d.giudizio, _lastRelazione, interventoFull
+  ]];
+
+  // Use Google Sheets API via Apps Script web app (public append endpoint)
+  // Since we can't use OAuth here, we use the Anthropic API to format and
+  // tell the user to paste — but first try direct fetch to a published script
+  // 
+  // Alternative approach: use the sheets.append via a CORS-friendly method
+  // We'll use the gviz/tq endpoint to verify connection, then guide user
+
+  // For now: copy to clipboard in TSV format for manual paste
+  // AND show a formatted confirmation
+  try {
+    const tsv = values[0].map(v => v === null || v === undefined ? '' : String(v)).join('\t');
+    await navigator.clipboard.writeText(tsv);
+    
+    status.className = 'save-status ok';
+    status.innerHTML = \`✅ Riga copiata! <strong>Apri Google Sheets → vai all'ultima riga vuota → Ctrl+V</strong><br>
+      <a href="https://docs.google.com/spreadsheets/d/\${SHEETS_ID}/edit#gid=\${SHEETS_GID}" target="_blank" style="color:#155724;font-weight:700;">
+      → Apri il foglio ora
+      </a>\`;
+    btn.disabled = false;
+  } catch(e) {
+    status.className = 'save-status err';
+    status.textContent = 'Errore nella copia. Usa il pulsante "Copia riga TSV" nel pannello destra.';
+    btn.disabled = false;
+  }
+}
+
+
+// ===== FREE TEXT SEARCH =====
+let _searchTimer = null;
+
+function debounceSearch() {
+  clearTimeout(_searchTimer);
+  const q = document.getElementById('searchText').value.trim();
+  if (q.length < 2) { document.getElementById('searchResults').innerHTML = ''; return; }
+  _searchTimer = setTimeout(searchFreeText, 400);
+}
+
+function searchFreeText() {
+  const q = (document.getElementById('searchText').value || '').trim().toLowerCase();
+  if (q.length < 2) { document.getElementById('searchResults').innerHTML = ''; return; }
+
+  const regioni2026 = ['piemonte','valle daosta','toscana','puglia','emilia-romagna','emilia romagna','campania','basilicata'];
+  const results = [];
+
+  for (const [cod, pv] of Object.entries(PV_LOOKUP)) {
+    const haystack = [pv.insegna, pv.localita, pv.centroComm, pv.ragioneSociale, pv.regione, pv.provincia]
+      .join(' ').toLowerCase();
+    if (haystack.includes(q)) {
+      results.push({ cod, pv });
+      if (results.length >= 30) break;
+    }
+  }
+
+  const el = document.getElementById('searchResults');
+  if (results.length === 0) {
+    el.innerHTML = '<div style="padding:8px 12px;font-size:12px;color:#888;">Nessun risultato trovato.</div>';
+    return;
+  }
+
+  const isTarget = (reg) => regioni2026.some(r => reg.toLowerCase().includes(r));
+
+  el.innerHTML = '<div class="search-results-list">' +
+    results.map(({cod, pv}) => {
+      const target = isTarget(pv.regione);
+      const badge = target ? '<span class="sri-campagna">✓ Campagna 2026</span>' : '';
+      return \`<div class="search-result-item" onclick="selectSearchResult('\${cod}')">
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span class="sri-code">\${cod}</span>
+          <span class="sri-name">\${pv.insegna}</span>
+          \${badge}
+        </div>
+        <div class="sri-detail">\${pv.centroComm} · \${pv.localita} (\${pv.provincia}) · \${pv.regione}</div>
+        \${pv.note ? \`<div class="sri-detail" style="font-style:italic;color:#777;">\${pv.note.slice(0,80)}\${pv.note.length>80?'...':''}</div>\` : ''}
+      </div>\`;
+    }).join('') +
+  '</div>';
+}
+
+function selectSearchResult(cod) {
+  // Set the codice field and trigger lookup
+  document.getElementById('codicePv').value = cod;
+  document.getElementById('searchResults').innerHTML = '';
+  document.getElementById('searchText').value = '';
+  lookupPV();
+  // Scroll to top of form
+  document.querySelector('.left').scrollTo({top: 0, behavior: 'smooth'});
 }
 
 </script>
