@@ -504,7 +504,7 @@ Estrai SOLO un oggetto JSON valido senza testo prima o dopo, con questi campi:
 function showExtractedNotice() {
   const out = document.getElementById('outputArea');
   out.innerHTML = `<div style="background:#d4edda;border:1px solid #28a745;border-radius:8px;padding:14px;font-size:13px;color:#155724;">
-    ✅ <strong>Dati estratti dall'AI.</strong> Verifica i campi a sinistra, poi clicca <em>"Genera riga Excel + relazione"</em>.
+    ✅ <strong>Dati estratti dall’AI.</strong> Verifica i campi a sinistra, poi clicca <em>"Genera riga Excel + relazione"</em>.
   </div>`;
 }
 
@@ -856,7 +856,7 @@ function lookupPV() {
   if (!raw) return;
   const key = normalizeCod(raw);
   if (!key) {
-    showLookupBadge('not-found', 'Codice non trovato nell'anagrafica');
+    showLookupBadge("not-found", "Codice non trovato nell’anagrafica");
     return;
   }
   const pv = PV_LOOKUP[key];
@@ -890,7 +890,7 @@ function showLookupBadge(type, ragione, insegna, localita, regione, isTarget, ch
   if (!el) return;
   if (type === 'not-found') {
     el.innerHTML = `<div style="background:#f8d7da;border:1px solid #f5c6cb;border-radius:6px;padding:10px 12px;font-size:12px;color:#721c24;">
-      ⚠️ Codice non trovato nell'anagrafica — compila manualmente.
+      ⚠️ Codice non trovato nell’anagrafica — compila manualmente.
     </div>`;
     return;
   }
