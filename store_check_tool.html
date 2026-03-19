@@ -850,42 +850,39 @@ async function saveToSheets() {
     d.giudizio, _lastRelazione, interventoFull
   ];
 
-  var tsv = row.map(function(v){ return v === null || v === undefined ? '' : String(v); }).join('\t');
+  var scriptUrl = 'https://script.google.com/macros/s/AKfycbyDV-j77e_q_Sc2rk7KHffJNdjgT_kziRfVmgH6lnpGWD5Hxg2CLicYaD9sKPbK1EE/exec';
 
-  // Try Apps Script if configured
-  var scriptUrl = window.APPS_SCRIPT_URL || '';
-  if (scriptUrl) {
-    try {
-      var resp = await fetch(scriptUrl, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ row: row })
-      });
-      status.className = 'save-status ok';
-      status.innerHTML = '&#9989; Riga salvata su Google Sheets!';
-      btn.disabled = false;
-      return;
-    } catch(e) {
-      console.log('Apps Script fallback to clipboard', e);
-    }
-  }
-
-  // Fallback: clipboard + link
+  // Use fetch with no-cors — Apps Script receives it even without response
   try {
-    await navigator.clipboard.writeText(tsv);
-    status.className = 'save-status ok';
-    status.innerHTML = '&#9989; Riga copiata negli appunti!'
-      + ' <strong>Apri Sheets &rarr; prima cella vuota &rarr; Ctrl+V</strong><br>'
-      + '<a href="https://docs.google.com/spreadsheets/d/' + SHEETS_ID + '/edit#gid=' + SHEETS_GID + '" target="_blank" style="color:#155724;font-weight:700;">'
-      + '&rarr; Apri il foglio</a>';
+    fetch(scriptUrl, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({ row: row })
+    });
+    // Wait 1.5s then show success (no-cors means we can't read the response)
+    setTimeout(function() {
+      status.className = 'save-status ok';
+      status.innerHTML = '&#9989; Riga inviata a Google Sheets!<br>'
+        + '<a href="https://docs.google.com/spreadsheets/d/' + SHEETS_ID + '/edit#gid=' + SHEETS_GID + '" target="_blank" style="color:#155724;font-weight:700;">'
+        + '&rarr; Apri il foglio per verificare</a>';
+      btn.disabled = false;
+    }, 1500);
   } catch(e) {
-    // Manual TSV display
-    status.className = 'save-status ok';
-    status.innerHTML = '&#9989; Copia questa riga e incollala in Sheets:<br>'
-      + '<textarea style="width:100%;height:60px;font-size:10px;margin-top:4px;">' + tsv.replace(/</g,'&lt;') + '</textarea>';
+    // Fallback clipboard
+    var tsv = row.map(function(v){ return v === null || v === undefined ? '' : String(v); }).join('\t');
+    try {
+      await navigator.clipboard.writeText(tsv);
+      status.className = 'save-status ok';
+      status.innerHTML = '&#9989; Riga copiata! Incolla in Sheets con Ctrl+V<br>'
+        + '<a href="https://docs.google.com/spreadsheets/d/' + SHEETS_ID + '/edit#gid=' + SHEETS_GID + '" target="_blank" style="color:#155724;font-weight:700;">'
+        + '&rarr; Apri il foglio</a>';
+    } catch(e2) {
+      status.className = 'save-status err';
+      status.textContent = 'Errore invio. Riprova.';
+    }
+    btn.disabled = false;
   }
-  btn.disabled = false;
 }
 
 
