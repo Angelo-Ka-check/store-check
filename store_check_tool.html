@@ -924,10 +924,10 @@ async function saveToSheets() {
     await navigator.clipboard.writeText(tsv);
     
     status.className = 'save-status ok';
-    status.innerHTML = \`✅ Riga copiata! <strong>Apri Google Sheets → vai all'ultima riga vuota → Ctrl+V</strong><br>
-      <a href="https://docs.google.com/spreadsheets/d/\${SHEETS_ID}/edit#gid=\${SHEETS_GID}" target="_blank" style="color:#155724;font-weight:700;">
-      → Apri il foglio ora
-      </a>\`;
+        status.innerHTML = '&#9989; Riga copiata! <strong>Apri Google Sheets &rarr; vai all\'ultima riga vuota &rarr; Ctrl+V</strong><br>'
+      + '<a href="https://docs.google.com/spreadsheets/d/' + SHEETS_ID + '/edit#gid=' + SHEETS_GID + '" target="_blank" style="color:#155724;font-weight:700;">'
+      + '&rarr; Apri il foglio ora'
+      + '</a>';
     btn.disabled = false;
   } catch(e) {
     status.className = 'save-status err';
@@ -948,44 +948,54 @@ function debounceSearch() {
 }
 
 function searchFreeText() {
-  const q = (document.getElementById('searchText').value || '').trim().toLowerCase();
+  var q = (document.getElementById('searchText').value || '').trim().toLowerCase();
   if (q.length < 2) { document.getElementById('searchResults').innerHTML = ''; return; }
 
-  const regioni2026 = ['piemonte','valle daosta','toscana','puglia','emilia-romagna','emilia romagna','campania','basilicata'];
-  const results = [];
-
-  for (const [cod, pv] of Object.entries(PV_LOOKUP)) {
-    const haystack = [pv.insegna, pv.localita, pv.centroComm, pv.ragioneSociale, pv.regione, pv.provincia]
+  var regioni2026 = ['piemonte','valle daosta','toscana','puglia','emilia-romagna','emilia romagna','campania','basilicata'];
+  var results = [];
+  var keys = Object.keys(PV_LOOKUP);
+  for (var i = 0; i < keys.length; i++) {
+    var cod = keys[i];
+    var pv = PV_LOOKUP[cod];
+    var haystack = [pv.insegna, pv.localita, pv.centroComm, pv.ragioneSociale, pv.regione, pv.provincia]
       .join(' ').toLowerCase();
-    if (haystack.includes(q)) {
-      results.push({ cod, pv });
+    if (haystack.indexOf(q) >= 0) {
+      results.push({ cod: cod, pv: pv });
       if (results.length >= 30) break;
     }
   }
 
-  const el = document.getElementById('searchResults');
+  var el = document.getElementById('searchResults');
   if (results.length === 0) {
     el.innerHTML = '<div style="padding:8px 12px;font-size:12px;color:#888;">Nessun risultato trovato.</div>';
     return;
   }
 
-  const isTarget = (reg) => regioni2026.some(r => reg.toLowerCase().includes(r));
+  function isTarget(reg) {
+    for (var i = 0; i < regioni2026.length; i++) {
+      if (reg.toLowerCase().indexOf(regioni2026[i]) >= 0) return true;
+    }
+    return false;
+  }
 
-  el.innerHTML = '<div class="search-results-list">' +
-    results.map(({cod, pv}) => {
-      const target = isTarget(pv.regione);
-      const badge = target ? '<span class="sri-campagna">✓ Campagna 2026</span>' : '';
-      return \`<div class="search-result-item" onclick="selectSearchResult('\${cod}')">
-        <div style="display:flex;align-items:center;gap:6px;">
-          <span class="sri-code">\${cod}</span>
-          <span class="sri-name">\${pv.insegna}</span>
-          \${badge}
-        </div>
-        <div class="sri-detail">\${pv.centroComm} · \${pv.localita} (\${pv.provincia}) · \${pv.regione}</div>
-        \${pv.note ? \`<div class="sri-detail" style="font-style:italic;color:#777;">\${pv.note.slice(0,80)}\${pv.note.length>80?'...':''}</div>\` : ''}
-      </div>\`;
-    }).join('') +
-  '</div>';
+  var html = '<div class="search-results-list">';
+  for (var j = 0; j < results.length; j++) {
+    var cod = results[j].cod;
+    var pv = results[j].pv;
+    var badge = isTarget(pv.regione) ? '<span class="sri-campagna">&#10003; Campagna 2026</span>' : '';
+    var noteHtml = pv.note ? '<div class="sri-detail" style="font-style:italic;color:#777;">' + pv.note.slice(0,80) + (pv.note.length > 80 ? '...' : '') + '</div>' : '';
+    html += '<div class="search-result-item" onclick="selectSearchResult(\'' + cod + '\')">'
+          + '<div style="display:flex;align-items:center;gap:6px;">'
+          + '<span class="sri-code">' + cod + '</span>'
+          + '<span class="sri-name">' + pv.insegna + '</span>'
+          + badge
+          + '</div>'
+          + '<div class="sri-detail">' + pv.centroComm + ' &middot; ' + pv.localita + ' (' + pv.provincia + ') &middot; ' + pv.regione + '</div>'
+          + noteHtml
+          + '</div>';
+  }
+  html += '</div>';
+  el.innerHTML = html;
 }
 
 function selectSearchResult(cod) {
