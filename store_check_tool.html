@@ -223,10 +223,10 @@
       <div class="brand-grid" style="margin-top:8px;">
         <div><div class="brand-mini-label">Ripiani</div><input type="number" id="f02ripiani" placeholder="1" min="0" max="20"></div>
         <div><div class="brand-mini-label">Pezzi</div><input type="number" id="f02pezzi" placeholder="45" min="0"></div>
-        <div><div class="brand-mini-label">Spazio (1-5)</div><input type="number" id="f02spazio" placeholder="5" min="1" max="5" step="0.5"></div>
-        <div><div class="brand-mini-label">Esposizione (1-5)</div><input type="number" id="f02esposizione" placeholder="5" min="1" max="5" step="0.5"></div>
+        <div><div class="brand-mini-label">Spazio (1-5)</div><input type="number" id="f02spazio" oninput="calcMedia('f02')" placeholder="5" min="1" max="5" step="0.5"></div>
+        <div><div class="brand-mini-label">Espo (1-5)</div><input type="number" id="f02esposizione" oninput="calcMedia('f02')" placeholder="5" min="1" max="5" step="0.5"></div>
       </div>
-      <div style="margin-top:6px;"><label>Media voto</label><input type="number" id="f02mediavoto" placeholder="5.0" min="1" max="5" step="0.5"></div>
+      <div style="margin-top:6px;"><label>Media voto</label><input type="number" id="f02mediavoto" placeholder="auto" style="background:#fffde7;" placeholder="5.0" min="1" max="5" step="0.5"></div>
       <div style="margin-top:6px;"><label>Materiale POP</label><input type="text" id="f02pop" placeholder="es. Materiale aggiornato, Pannello ok..."></div>
     </div>
 
@@ -236,23 +236,45 @@
       <div class="brand-grid">
         <div><div class="brand-mini-label">Pezzi</div><input type="number" id="f01pezzi" min="0"></div>
         <div><div class="brand-mini-label">Ripiani</div><input type="number" id="f01ripiani" min="0"></div>
-        <div><div class="brand-mini-label">Spazio (1-5)</div><input type="number" id="f01spazio" min="1" max="5" step="0.5"></div>
-        <div><div class="brand-mini-label">Esposizione (1-5)</div><input type="number" id="f01esposizione" min="1" max="5" step="0.5"></div>
+        <div><div class="brand-mini-label">Spazio (1-5)</div><input type="number" id="f01spazio" oninput="calcMedia('f01')" min="1" max="5" step="0.5"></div>
+        <div><div class="brand-mini-label">Espo (1-5)</div><input type="number" id="f01esposizione" oninput="calcMedia('f01')" min="1" max="5" step="0.5"></div>
       </div>
-      <div style="margin-top:6px;"><label>Media voto</label><input type="number" id="f01mediavoto" min="1" max="5" step="0.5"></div>
+      <div style="margin-top:6px;"><label>Media voto</label><input type="number" id="f01mediavoto" placeholder="auto" style="background:#fffde7;" min="1" max="5" step="0.5"></div>
       <div style="margin-top:6px;"><label>Materiale POP</label><input type="text" id="f01pop"></div>
     </div>
 
-    <!-- CALYPSO/JAGUAR (06) -->
+    <!-- JAGUAR 03 -->
+    <div class="brand-block" style="border-left:4px solid #1B5E20;">
+      <div class="brand-label" style="background:#1B5E20;">JAGUAR (03)</div>
+      <div>
+        <label>Tipo di esposizione</label>
+        <select id="j03tipo">
+          <option value="">—</option>
+          <option>100 (ripiano grande)</option><option>50 (ripiano piccolo)</option>
+          <option>Orizzontale, 100 (ripiano grande)</option><option>Orizzontale, 50 (ripiano piccolo)</option>
+          <option>Verticale, 100 (ripiano grande)</option><option>Verticale, 50 (ripiano piccolo)</option>
+        </select>
+      </div>
+      <div class="brand-grid" style="margin-top:8px;">
+        <div><div class="brand-mini-label">Ripiani</div><input type="number" id="j03ripiani" placeholder="1" min="0" max="20"></div>
+        <div><div class="brand-mini-label">Pezzi</div><input type="number" id="j03pezzi" min="0"></div>
+        <div><div class="brand-mini-label">Spazio</div><input type="number" id="j03spazio" oninput="calcMedia('j03')" min="1" max="5" step="0.5"></div>
+        <div><div class="brand-mini-label">Espo (1-5)</div><input type="number" id="j03esposizione" oninput="calcMedia('j03')" min="1" max="5" step="0.5"></div>
+        <div><div class="brand-mini-label">Media voto</div><input type="number" id="j03mediavoto" placeholder="auto" style="background:#fffde7;" min="1" max="5" step="0.1" placeholder="auto" style="background:#fffde7;"></div>
+      </div>
+      <div style="margin-top:6px;"><label>POP / Note</label><input type="text" id="j03pop" placeholder="Descrizione materiale POP o note..."></div>
+    </div>
+
+    <!-- CALYPSO (06) (06) -->
     <div class="brand-block">
       <div class="brand-label">CALYPSO / JAGUAR (06)</div>
       <div class="brand-grid">
         <div><div class="brand-mini-label">Ripiani</div><input type="number" id="f06ripiani" min="0"></div>
         <div><div class="brand-mini-label">Pezzi</div><input type="number" id="f06pezzi" min="0"></div>
-        <div><div class="brand-mini-label">Spazio (1-5)</div><input type="number" id="f06spazio" min="1" max="5" step="0.5"></div>
-        <div><div class="brand-mini-label">Esposizione (1-5)</div><input type="number" id="f06esposizione" min="1" max="5" step="0.5"></div>
+        <div><div class="brand-mini-label">Spazio (1-5)</div><input type="number" id="f06spazio" oninput="calcMedia('f06')" min="1" max="5" step="0.5"></div>
+        <div><div class="brand-mini-label">Espo (1-5)</div><input type="number" id="f06esposizione" oninput="calcMedia('f06')" min="1" max="5" step="0.5"></div>
       </div>
-      <div style="margin-top:6px;"><label>Media voto</label><input type="number" id="f06mediavoto" min="1" max="5" step="0.5"></div>
+      <div style="margin-top:6px;"><label>Media voto</label><input type="number" id="f06mediavoto" placeholder="auto" style="background:#fffde7;" min="1" max="5" step="0.5"></div>
       <div style="margin-top:6px;"><label>Materiale POP</label><input type="text" id="f06pop"></div>
     </div>
 
@@ -261,15 +283,18 @@
       <div class="section-title">⚔️ Competitor</div>
       <div class="competitor-grid">
         <div>
-          <label>Casio — pezzi</label><input type="number" id="casioPz" min="0">
+          <label>Casio — ripiani</label><input type="number" id="casioRip" min="0" max="10">
+          <label style="margin-top:6px;">Casio — pezzi</label><input type="number" id="casioPz" min="0">
           <label style="margin-top:6px;">Casio — voto</label><input type="number" id="casioVoto" min="1" max="5" step="0.5">
         </div>
         <div>
-          <label>Citizen — pezzi</label><input type="number" id="citizenPz" min="0">
+          <label>Citizen — ripiani</label><input type="number" id="citizenRip" min="0" max="10">
+          <label style="margin-top:6px;">Citizen — pezzi</label><input type="number" id="citizenPz" min="0">
           <label style="margin-top:6px;">Citizen — voto</label><input type="number" id="citizenVoto" min="1" max="5" step="0.5">
         </div>
         <div>
-          <label>Sector — pezzi</label><input type="number" id="sectorPz" min="0">
+          <label>Sector — ripiani</label><input type="number" id="sectorRip" min="0" max="10">
+          <label style="margin-top:6px;">Sector — pezzi</label><input type="number" id="sectorPz" min="0">
           <label style="margin-top:6px;">Sector — voto</label><input type="number" id="sectorVoto" min="1" max="5" step="0.5">
         </div>
       </div>
@@ -430,7 +455,7 @@ async function parseWithAI() {
   btn.innerHTML = '<span class="spinner"></span>Estrazione in corso...';
 
   const systemPrompt = `Sei un assistente che estrae dati strutturati da appunti di campo di uno store check su orologi.
-I brand del gruppo sono: FESTINA (codice 02), LOTUS (codice 01), CALYPSO/JAGUAR (codice 06).
+I brand del gruppo sono: FESTINA (codice 02), LOTUS (codice 01), CALYPSO (06) (codice 06).
 I competitor sono: CASIO, CITIZEN, SECTOR.
 Il sistema di valutazione va da 1 a 5.
 Il giudizio finale è: VERDE, GIALLO, ROSSO.
@@ -459,6 +484,15 @@ Estrai SOLO un oggetto JSON valido senza testo prima o dopo, con questi campi:
   "f01esposizione": numero 1-5 o null,
   "f01mediavoto": numero 1-5 o null,
   "f01pop": "vuoto",
+  "j03ripiani": numero o null,
+  "j03pezzi": numero o null,
+  "j03spazio": numero 1-5 o null,
+  "j03esposizione": numero 1-5 o null,
+  "j03mediavoto": numero 1-5 o null,
+  "j03pop": "vuoto",
+  "casioRip": numero o null,
+  "citizenRip": numero o null,
+  "sectorRip": numero o null,
   "f06ripiani": numero o null,
   "f06pezzi": numero o null,
   "f06spazio": numero 1-5 o null,
@@ -585,16 +619,26 @@ function collectData() {
     f01esposizione: gv('f01esposizione'),
     f01mediavoto: gv('f01mediavoto'),
     f01pop: gv('f01pop'),
+    j03tipo: gv('j03tipo'),
+    j03ripiani: gv('j03ripiani'),
+    j03pezzi: gv('j03pezzi'),
+    j03spazio: gv('j03spazio'),
+    j03esposizione: gv('j03esposizione'),
+    j03mediavoto: gv('j03mediavoto'),
+    j03pop: gv('j03pop'),
     f06ripiani: gv('f06ripiani'),
     f06pezzi: gv('f06pezzi'),
     f06spazio: gv('f06spazio'),
     f06esposizione: gv('f06esposizione'),
     f06mediavoto: gv('f06mediavoto'),
     f06pop: gv('f06pop'),
+    casioRip: gv('casioRip'),
     casioPz: gv('casioPz'),
     casioVoto: gv('casioVoto'),
+    citizenRip: gv('citizenRip'),
     citizenPz: gv('citizenPz'),
     citizenVoto: gv('citizenVoto'),
+    sectorRip: gv('sectorRip'),
     sectorPz: gv('sectorPz'),
     sectorVoto: gv('sectorVoto'),
     giudizio: gv('giudizio'),
@@ -727,7 +771,7 @@ function renderOutput(data, relazione, concatena, codTxt, giudizio2) {
         <tr><td>Festina — ripiani</td><td>${data.f02ripiani || '—'} &nbsp;·&nbsp; ${data.f02tipo || '—'}</td></tr>
         <tr><td>POP Festina</td><td>${data.f02pop || '—'}</td></tr>
         ${data.f01pezzi ? `<tr><td>Lotus — pezzi</td><td>${data.f01pezzi} pz · media ${data.f01mediavoto || '—'}</td></tr>` : ''}
-        ${data.f06pezzi ? `<tr><td>Calypso/Jaguar</td><td>${data.f06pezzi} pz · media ${data.f06mediavoto || '—'}</td></tr>` : ''}
+        ${data.f06pezzi ? `<tr><td>CALYPSO (06)</td><td>${data.f06pezzi} pz · media ${data.f06mediavoto || '—'}</td></tr>` : ''}
         <tr><td>Casio</td><td>${data.casioPz ? data.casioPz + ' pz ·' : ''} voto ${data.casioVoto || '—'}</td></tr>
         <tr><td>Citizen</td><td>${data.citizenPz ? data.citizenPz + ' pz ·' : ''} voto ${data.citizenVoto || '—'}</td></tr>
         <tr><td>Sector</td><td>${data.sectorPz ? data.sectorPz + ' pz ·' : ''} voto ${data.sectorVoto || '—'}</td></tr>
@@ -902,11 +946,11 @@ async function saveToSheets() {
     d.insegna, d.codicePv, d.clusterCC || '', d.clusterPV || '',
     d.f02ripiani, d.f02pezzi, d.f02mediavoto, d.f02pop,
     d.f01ripiani, d.f01pezzi, d.f01mediavoto, d.f01pop,
-    '', '', '', '',  // J03 - Jaguar (not in current form, empty)
+    d.j03ripiani, d.j03pezzi, d.j03mediavoto, d.j03pop,
     d.f06ripiani, d.f06pezzi, d.f06mediavoto, d.f06pop,
-    '', d.casioPz, d.casioVoto,
-    '', d.citizenPz, d.citizenVoto,
-    '', d.sectorPz, d.sectorVoto,
+    d.casioRip, d.casioPz, d.casioVoto,
+    d.citizenRip, d.citizenPz, d.citizenVoto,
+    d.sectorRip, d.sectorPz, d.sectorVoto,
     d.giudizio, _lastRelazione, interventoFull
   ]];
 
@@ -1006,6 +1050,19 @@ function selectSearchResult(cod) {
   lookupPV();
   // Scroll to top of form
   document.querySelector('.left').scrollTo({top: 0, behavior: 'smooth'});
+}
+
+
+function calcMedia(brand) {
+  var spazioEl = document.getElementById(brand + 'spazio');
+  var espoEl = document.getElementById(brand + 'esposizione');
+  var mediaEl = document.getElementById(brand + 'mediavoto');
+  if (!spazioEl || !espoEl || !mediaEl) return;
+  var s = parseFloat(spazioEl.value);
+  var e = parseFloat(espoEl.value);
+  if (!isNaN(s) && !isNaN(e)) {
+    mediaEl.value = Math.round(((s + e) / 2) * 10) / 10;
+  }
 }
 
 </script>
