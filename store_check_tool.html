@@ -520,7 +520,7 @@ async function generateRow() {
   // Build relazione if empty
   let relazione = data.breve;
   if (!relazione) {
-    relazione = generateRelazione(data);
+    relazione = await generateRelazione(data);
   }
 
   const concatena = buildConcatena(data, relazione);
@@ -587,49 +587,52 @@ function collectData() {
   };
 }
 
-function generateRelazione(data) {
-  var parts = [];
-  var brand = data.insegna || 'Il punto vendita';
-  var cc = data.centroComm && data.centroComm !== 'Altro' ? ' (' + data.centroComm + ')' : '';
-  var loc = data.localita ? ' di ' + data.localita : '';
-
-  // Opening
-  if (data.giudizio === 'VERDE') {
-    parts.push(brand + cc + loc + ' presenta una situazione espositiva positiva.');
-  } else if (data.giudizio === 'GIALLO') {
-    parts.push(brand + cc + loc + ': situazione da monitorare, con margini di miglioramento.');
-  } else if (data.giudizio === 'ROSSO') {
-    parts.push(brand + cc + loc + ': situazione critica che richiede intervento urgente.');
-  } else {
-    parts.push(brand + cc + loc + '.');
+async function generateRelazione(data) {
+  var notes = data.breve || '';
+  var prompt = 'Sei un assistente per store check di orologi. Scrivi una relazione professionale e sintetica (2-3 frasi) basata su questi dati di visita. NON menzionare il nome del punto vendita. Vai diretto ai fatti.'
+    + ' Giudizio: ' + (data.giudizio || '--')
+    + '. Festina: ' + (data.f02pezzi || '?') + ' pz, ' + (data.f02ripiani || '?') + ' ripiani, voto ' + (data.f02mediavoto || '?')
+    + '. Lotus: ' + (data.f01pezzi || '--') + ' pz voto ' + (data.f01mediavoto || '--')
+    + '. Jaguar: ' + (data.j03pezzi || '--') + ' pz voto ' + (data.j03mediavoto || '--')
+    + '. Calypso: ' + (data.f06pezzi || '--') + ' pz voto ' + (data.f06mediavoto || '--')
+    + '. Competitor - Casio: ' + (data.casioPz || '--') + ' pz voto ' + (data.casioVoto || '--')
+    + ', Citizen: ' + (data.citizenPz || '--') + ' pz voto ' + (data.citizenVoto || '--')
+    + ', Sector: ' + (data.sectorPz || '--') + ' pz voto ' + (data.sectorVoto || '--')
+    + '. Entusiasmo responsabile: ' + (entusiasmoLabel(data.entusiasmo) || '--')
+    + '. Intervento: ' + ([data.interventoCheckboxes, data.intervento].filter(Boolean).join(', ') || 'nessuno')
+    + (notes ? '. Note aggiuntive: ' + notes : '')
+    + '. Rispondi SOLO con il testo della relazione, senza titoli o elenchi.';
+  try {
+    var res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 200,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    var d = await res.json();
+    return d.content.filter(function(b){ return b.type === 'text'; }).map(function(b){ return b.text; }).join('').trim();
+  } catch(e) {
+    // Fallback locale
+    var parts = [];
+    if (data.f02pezzi || data.f02mediavoto) {
+      var f = 'Festina';
+      if (data.f02ripiani)   f += ' ' + data.f02ripiani + ' rip.';
+      if (data.f02pezzi)     f += ', ' + data.f02pezzi + ' pz';
+      if (data.f02mediavoto) f += ', voto ' + data.f02mediavoto;
+      parts.push(f + '.');
+    }
+    var comp = [];
+    if (data.casioVoto)   comp.push('Casio ' + data.casioVoto);
+    if (data.citizenVoto) comp.push('Citizen ' + data.citizenVoto);
+    if (data.sectorVoto)  comp.push('Sector ' + data.sectorVoto);
+    if (comp.length) parts.push('Comp.: ' + comp.join(', ') + '.');
+    var interv = [data.interventoCheckboxes, data.intervento].filter(Boolean).join(' — ');
+    if (interv) parts.push(interv + '.');
+    return parts.join(' ');
   }
-
-  // Festina details
-  if (data.f02pezzi || data.f02mediavoto) {
-    var f = 'Festina esposta';
-    if (data.f02ripiani) f += ' su ' + data.f02ripiani + ' ripian' + (data.f02ripiani == 1 ? 'o' : 'i');
-    if (data.f02pezzi)    f += ' con ' + data.f02pezzi + ' pezzi';
-    if (data.f02mediavoto) f += ', media voto ' + data.f02mediavoto;
-    if (data.f02pop)       f += '. ' + data.f02pop;
-    parts.push(f + '.');
-  }
-
-  // Competitor comparison
-  var comp = [];
-  if (data.casioVoto)   comp.push('Casio ' + data.casioVoto);
-  if (data.citizenVoto) comp.push('Citizen ' + data.citizenVoto);
-  if (data.sectorVoto)  comp.push('Sector ' + data.sectorVoto);
-  if (comp.length > 0) parts.push('Competitor: ' + comp.join(', ') + '.');
-
-  // Intervention
-  var interv = [data.interventoCheckboxes, data.intervento].filter(Boolean).join(' — ');
-  if (interv && data.giudizio !== 'VERDE') {
-    parts.push('Azione richiesta: ' + interv + '.');
-  } else if (interv) {
-    parts.push('Intervento suggerito: ' + interv + '.');
-  }
-
-  return parts.join(' ');
 }
 
 function buildConcatena(d, relazione) {
@@ -970,6 +973,62 @@ function calcMedia(brand) {
   }
 }
 
+
+// ── VOICE INPUT ────────────────────────────────────────────────────────────
+var _voiceRecognition = null;
+var _voiceActive = false;
+
+function toggleVoice() {
+  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+    alert('Il tuo browser non supporta il riconoscimento vocale. Usa Chrome.');
+    return;
+  }
+  if (_voiceActive) {
+    _voiceRecognition.stop();
+    return;
+  }
+  var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  _voiceRecognition = new SpeechRecognition();
+  _voiceRecognition.lang = 'it-IT';
+  _voiceRecognition.continuous = true;
+  _voiceRecognition.interimResults = true;
+  var btn = document.getElementById('voiceBtn');
+  _voiceRecognition.onstart = function() {
+    _voiceActive = true;
+    btn.style.background = '#c0392b';
+    btn.textContent = '⏹';
+    btn.title = 'Clicca per fermare';
+  };
+  _voiceRecognition.onresult = function(event) {
+    var transcript = '';
+    for (var i = event.resultIndex; i < event.results.length; i++) {
+      transcript += event.results[i][0].transcript;
+    }
+    var el = document.getElementById('breve');
+    var base = el.dataset.base || el.value;
+    el.dataset.base = base;
+    el.value = base + (base ? ' ' : '') + transcript;
+  };
+  _voiceRecognition.onfinal = function() {
+    var el = document.getElementById('breve');
+    el.dataset.base = el.value;
+  };
+  _voiceRecognition.onend = function() {
+    _voiceActive = false;
+    var el = document.getElementById('breve');
+    el.dataset.base = el.value;
+    btn.style.background = '#1a1a2e';
+    btn.textContent = '🎤';
+    btn.title = 'Registra voce';
+  };
+  _voiceRecognition.onerror = function(e) {
+    _voiceActive = false;
+    btn.style.background = '#1a1a2e';
+    btn.textContent = '🎤';
+    if (e.error !== 'aborted') alert('Errore microfono: ' + e.error);
+  };
+  _voiceRecognition.start();
+}
 </script>
 </body>
 </html>
