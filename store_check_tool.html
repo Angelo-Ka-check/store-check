@@ -523,7 +523,7 @@ async function generateRow() {
   // Build relazione if empty
   let relazione = data.breve;
   if (!relazione) {
-    relazione = await generateRelazione(data);
+    relazione = generateRelazione(data);
   }
 
   const concatena = buildConcatena(data, relazione);
@@ -590,52 +590,56 @@ function collectData() {
   };
 }
 
-async function generateRelazione(data) {
-  var notes = data.breve || '';
-  var prompt = 'Sei un assistente per store check di orologi. Scrivi una relazione professionale e sintetica (2-3 frasi) basata su questi dati di visita. NON menzionare il nome del punto vendita. Vai diretto ai fatti.'
-    + ' Giudizio: ' + (data.giudizio || '--')
-    + '. Festina: ' + (data.f02pezzi || '?') + ' pz, ' + (data.f02ripiani || '?') + ' ripiani, voto ' + (data.f02mediavoto || '?')
-    + '. Lotus: ' + (data.f01pezzi || '--') + ' pz voto ' + (data.f01mediavoto || '--')
-    + '. Jaguar: ' + (data.j03pezzi || '--') + ' pz voto ' + (data.j03mediavoto || '--')
-    + '. Calypso: ' + (data.f06pezzi || '--') + ' pz voto ' + (data.f06mediavoto || '--')
-    + '. Competitor - Casio: ' + (data.casioPz || '--') + ' pz voto ' + (data.casioVoto || '--')
-    + ', Citizen: ' + (data.citizenPz || '--') + ' pz voto ' + (data.citizenVoto || '--')
-    + ', Sector: ' + (data.sectorPz || '--') + ' pz voto ' + (data.sectorVoto || '--')
-    + '. Entusiasmo responsabile: ' + (entusiasmoLabel(data.entusiasmo) || '--')
-    + '. Intervento: ' + ([data.interventoCheckboxes, data.intervento].filter(Boolean).join(', ') || 'nessuno')
-    + (notes ? '. Note aggiuntive: ' + notes : '')
-    + '. Rispondi SOLO con il testo della relazione, senza titoli o elenchi.';
-  try {
-    var res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 200,
-        messages: [{ role: 'user', content: prompt }]
-      })
-    });
-    var d = await res.json();
-    return d.content.filter(function(b){ return b.type === 'text'; }).map(function(b){ return b.text; }).join('').trim();
-  } catch(e) {
-    // Fallback locale
-    var parts = [];
-    if (data.f02pezzi || data.f02mediavoto) {
-      var f = 'Festina';
-      if (data.f02ripiani)   f += ' ' + data.f02ripiani + ' rip.';
-      if (data.f02pezzi)     f += ', ' + data.f02pezzi + ' pz';
-      if (data.f02mediavoto) f += ', voto ' + data.f02mediavoto;
-      parts.push(f + '.');
-    }
-    var comp = [];
-    if (data.casioVoto)   comp.push('Casio ' + data.casioVoto);
-    if (data.citizenVoto) comp.push('Citizen ' + data.citizenVoto);
-    if (data.sectorVoto)  comp.push('Sector ' + data.sectorVoto);
-    if (comp.length) parts.push('Comp.: ' + comp.join(', ') + '.');
-    var interv = [data.interventoCheckboxes, data.intervento].filter(Boolean).join(' — ');
-    if (interv) parts.push(interv + '.');
-    return parts.join(' ');
+function generateRelazione(data) {
+  var parts = [];
+
+  // Situazione Festina
+  if (data.f02pezzi || data.f02mediavoto || data.f02ripiani) {
+    var f = 'Festina';
+    if (data.f02ripiani) f += ' su ' + data.f02ripiani + ' ripian' + (data.f02ripiani == 1 ? 'o' : 'i');
+    if (data.f02pezzi)   f += ', ' + data.f02pezzi + ' pz';
+    if (data.f02mediavoto) f += ', voto ' + data.f02mediavoto;
+    if (data.f02pop)     f += ' (' + data.f02pop + ')';
+    parts.push(f + '.');
   }
+
+  // Altri brand gruppo
+  var brandParts = [];
+  if (data.f01pezzi || data.f01mediavoto) {
+    var s = 'Lotus';
+    if (data.f01pezzi) s += ' ' + data.f01pezzi + ' pz';
+    if (data.f01mediavoto) s += ' voto ' + data.f01mediavoto;
+    brandParts.push(s);
+  }
+  if (data.j03pezzi || data.j03mediavoto) {
+    var s = 'Jaguar';
+    if (data.j03pezzi) s += ' ' + data.j03pezzi + ' pz';
+    if (data.j03mediavoto) s += ' voto ' + data.j03mediavoto;
+    brandParts.push(s);
+  }
+  if (data.f06pezzi || data.f06mediavoto) {
+    var s = 'Calypso';
+    if (data.f06pezzi) s += ' ' + data.f06pezzi + ' pz';
+    if (data.f06mediavoto) s += ' voto ' + data.f06mediavoto;
+    brandParts.push(s);
+  }
+  if (brandParts.length) parts.push(brandParts.join(', ') + '.');
+
+  // Competitor
+  var comp = [];
+  if (data.casioPz || data.casioVoto)     comp.push('Casio' + (data.casioPz ? ' ' + data.casioPz + ' pz' : '') + (data.casioVoto ? ' voto ' + data.casioVoto : ''));
+  if (data.citizenPz || data.citizenVoto) comp.push('Citizen' + (data.citizenPz ? ' ' + data.citizenPz + ' pz' : '') + (data.citizenVoto ? ' voto ' + data.citizenVoto : ''));
+  if (data.sectorPz || data.sectorVoto)   comp.push('Sector' + (data.sectorPz ? ' ' + data.sectorPz + ' pz' : '') + (data.sectorVoto ? ' voto ' + data.sectorVoto : ''));
+  if (comp.length) parts.push('Competitor: ' + comp.join(', ') + '.');
+
+  // Note vocali / libere
+  if (data.breve) parts.push(data.breve.trim() + '.');
+
+  // Intervento
+  var interv = [data.interventoCheckboxes, data.intervento].filter(Boolean).join(', ');
+  if (interv) parts.push('Intervento: ' + interv + '.');
+
+  return parts.join(' ');
 }
 
 function buildConcatena(d, relazione) {
