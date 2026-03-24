@@ -192,7 +192,11 @@
   </div>
   <div id="searchResults" style="margin-top:4px;"></div>
 </div>
-        <div><label>Centro commerciale</label><input type="text" id="centroComm" placeholder="es. Euroma 2"></div>
+        <div style="display:flex;gap:6px;align-items:flex-end;flex-wrap:wrap;">
+          <div style="flex:2;min-width:140px;"><label>Centro comm.</label><input type="text" id="centroComm" placeholder="es. Euroma 2"></div>
+          <div style="flex:1;min-width:65px;"><label>Cluster CC</label><select id="clusterCC"><option value="">—</option><option>A+</option><option>A</option><option>B</option><option>C</option><option>D</option></select></div>
+          <div style="flex:1;min-width:65px;"><label>Cluster PV</label><select id="clusterPV"><option value="">—</option><option>A+</option><option>A</option><option>B</option><option>C</option><option>D</option></select></div>
+        </div>
       </div>
       <div id="lookupBadge" style="margin-top:6px;"></div>
     <div class="field-row-3" style="margin-top:8px;">
@@ -204,9 +208,30 @@
 
     <!-- BRAND TRATTATI -->
     <div>
-      <div class="section-title">🏷 Brand trattati nel punto vendita</div>
-      <input type="text" id="brandTrattati" placeholder="es. FESTINA, CASIO, CITIZEN, SECTOR">
-    </div>
+        <label>Brand gruppo</label>
+        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+          <select id="brandGruppoSelect" onchange="applyBrandGruppo()" style="flex:1;min-width:160px;">
+            <option value="">— seleziona —</option>
+            <option value="Festina">Festina</option>
+            <option value="Festina, Calypso">Festina, Calypso</option>
+            <option value="Festina, Lotus">Festina, Lotus</option>
+            <option value="Festina, Calypso, Lotus">Festina, Calypso, Lotus</option>
+          </select>
+          <input type="text" id="brandGruppoExtra" placeholder="+ aggiungi..." style="width:120px;" oninput="updateBrandTrattati()">
+        </div>
+        <input type="hidden" id="brandTrattati">
+        <label style="margin-top:8px;display:block;">Brand competitor</label>
+        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+          <select id="brandCompSelect" onchange="applyBrandComp()" style="flex:1;min-width:160px;">
+            <option value="">— seleziona —</option>
+            <option value="Casio, Citizen, Sector">Casio, Citizen, Sector</option>
+            <option value="Casio, Citizen, Sector, Maserati, Bulova">Casio, Citizen, Sector, Maserati, Bulova</option>
+          </select>
+          <input type="text" id="brandCompExtra" placeholder="+ aggiungi..." style="width:120px;" oninput="updateBrandComp()">
+        </div>
+        <div id="brandCompTags" style="display:flex;flex-wrap:wrap;gap:4px;margin-top:4px;"></div>
+        <input type="hidden" id="brandComp">
+      </div>
 
     <!-- FESTINA (02) -->
     <div class="brand-block">
@@ -544,6 +569,7 @@ function collectData() {
     insegna: gv('insegna'),
     codicePv: gv('codicePv'),
     brandTrattati: gv('brandTrattati'),
+    brandComp: gv('brandComp'),
     f02tipo: gv('f02tipo'),
     f02ripiani: gv('f02ripiani'),
     f02pezzi: gv('f02pezzi'),
@@ -1035,6 +1061,66 @@ function toggleVoice() {
     if (e.error !== 'aborted') alert('Errore microfono: ' + e.error);
   };
   _voiceRecognition.start();
+}
+
+// ── BRAND MANAGEMENT ───────────────────────────────────────────────────────
+var _compBrands = [];
+
+function applyBrandGruppo() {
+  var val = document.getElementById('brandGruppoSelect').value;
+  updateBrandTrattati();
+}
+
+function updateBrandTrattati() {
+  var base = document.getElementById('brandGruppoSelect').value || '';
+  var extra = (document.getElementById('brandGruppoExtra').value || '').trim();
+  var combined = base + (base && extra ? ', ' : '') + extra;
+  document.getElementById('brandTrattati').value = combined;
+}
+
+function applyBrandComp() {
+  var val = document.getElementById('brandCompSelect').value;
+  if (!val) return;
+  _compBrands = val.split(', ').map(function(s){ return s.trim(); });
+  renderCompTags();
+}
+
+function updateBrandComp() {
+  // handled via tags
+}
+
+function addCompBrand() {
+  var extra = (document.getElementById('brandCompExtra').value || '').trim();
+  if (!extra) return;
+  extra.split(',').forEach(function(b){
+    var t = b.trim();
+    if (t && _compBrands.indexOf(t) < 0) _compBrands.push(t);
+  });
+  document.getElementById('brandCompExtra').value = '';
+  renderCompTags();
+}
+
+function removeCompBrand(name) {
+  _compBrands = _compBrands.filter(function(b){ return b !== name; });
+  renderCompTags();
+}
+
+function renderCompTags() {
+  var container = document.getElementById('brandCompTags');
+  container.innerHTML = '';
+  _compBrands.forEach(function(b) {
+    var tag = document.createElement('span');
+    tag.style.cssText = 'background:#e8f0fe;color:#1a73e8;border-radius:12px;padding:2px 8px;font-size:11px;display:inline-flex;align-items:center;gap:4px;margin:2px;';
+    var txt = document.createTextNode(b + ' ');
+    var x = document.createElement('span');
+    x.innerHTML = '&times;';
+    x.style.cssText = 'cursor:pointer;color:#999;font-size:14px;font-weight:bold;';
+    (function(name){ x.onclick = function(){ removeCompBrand(name); }; })(b);
+    tag.appendChild(txt);
+    tag.appendChild(x);
+    container.appendChild(tag);
+  });
+  document.getElementById('brandComp').value = _compBrands.join(', ');
 }
 </script>
 </body>
